@@ -1,41 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { useRecoilCallback, useRecoilValue, useSetRecoilState } from 'recoil';
+import styled from 'styled-components';
+import { Box, DragData } from './Box';
+import { boxesState, boxState } from './boxState';
+import { subtract, Vec2 } from './lib/vec2';
+import { Lines } from './Lines';
 
-interface AppProps {}
+export function App() {
+  const boxes = useRecoilValue(boxesState);
+  const setBoxPosition = useRecoilCallback(
+    ({ set }) => (id: number, position: Vec2) => {
+      set(boxState(id), (b) => ({ ...b, position }));
+    },
+  );
 
-function App({}: AppProps) {
-  // Create the count state.
-  const [count, setCount] = useState(0);
-  // Create the counter (+1 every second).
-  useEffect(() => {
-    const timer = setTimeout(() => setCount(count + 1), 1000);
-    return () => clearTimeout(timer);
-  }, [count, setCount]);
-  // Return the App component.
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <p>
-          Page has been open for <code>{count}</code> seconds.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </p>
-      </header>
-    </div>
+    <Wrapper
+      onDragOver={(e) => {
+        e.preventDefault();
+      }}
+      onDrop={(e) => {
+        const dragData = JSON.parse(e.dataTransfer.getData('text')) as DragData;
+        setBoxPosition(
+          dragData.id,
+          subtract({ x: e.pageX, y: e.pageY }, dragData.handlePosition),
+        );
+      }}
+    >
+      {boxes.map((boxId) => (
+        <Box key={boxId} id={boxId} />
+      ))}
+      <Lines />
+    </Wrapper>
   );
 }
 
-export default App;
+const Wrapper = styled.div`
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  min-width: 100vw;
+`;

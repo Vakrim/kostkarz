@@ -1,12 +1,18 @@
 import * as React from 'react';
-import { render } from '@testing-library/react';
+import { createEvent, fireEvent, render } from '@testing-library/react';
 import { expect } from 'chai';
-import App from './App';
+import { App } from './App';
+import { RecoilRoot } from 'recoil';
 
 describe('<App>', () => {
-  it('renders learn react link', () => {
-    const { getByText } = render(<App />);
-    const linkElement = getByText(/learn react/i);
-    expect(document.body.contains(linkElement));
+  it('renders boxes', () => {
+    const { getByText } = render(
+      <RecoilRoot>
+        <App />
+      </RecoilRoot>,
+    );
+    const box = getByText(/box 2/i);
+
+    expect(document.body.contains(box));
   });
 });
